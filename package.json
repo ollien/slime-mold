@@ -2,8 +2,24 @@
   "name": "cs-420x-assignment-3",
   "version": "0.1.0",
   "description": "Slime Mold Simulation",
-  "scripts": {
+  "scripts": {},
+  "author": "ollien",
+  "dependencies": {
+    "gl-now": "^1.4.0",
+    "gl-shader": "^4.2.1"
   },
-
-  "author": "ollien"
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "glslify": "^7.0.0",
+    "glslify-loader": "^2.0.0",
+    "raw-loader": "^4.0.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  }
 }

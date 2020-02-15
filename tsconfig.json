@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./src/ts",
+		"module": "ES6",
+		"sourceMap": true,
+		"moduleResolution": "node",
+		"lib": [
+			"DOM",
+			"DOM.Iterable",
+			"ES2015",
+			"ScriptHost"
+		],
+	},
+	"include": [
+		"src/ts/*.ts",
+	]
+}
