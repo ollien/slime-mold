@@ -14,12 +14,13 @@ function makeRandomData(rows: number, cols: number): ndarray<number> {
 		throw Error('Rows and Cols must be positive');
 	}
 
-	const values: number[] = [];
-	for (let i = 0; i < rows * cols * 4; i++) {
-		if (i % 4 === 3) {
-			values[i] = 255;
-		} else {
-			values[i] = Math.random() > 0.75 ? 255 : 0;
+	const values: number[] = Array(rows * cols * 4).fill(0);
+	for (let i = 0; i < values.length; i += 4) {
+		if (Math.random() > 0.99) {
+			values[i + 0] = 255;
+			values[i + 1] = Math.random() * 255;
+			values[i + 2] = 255;
+			values[i + 3] = 255;
 		}
 	}
 
