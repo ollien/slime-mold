@@ -2,14 +2,11 @@
 	precision mediump float;
 #endif
 
-uniform mediump float time;
-uniform mediump vec2 resolution;
+uniform vec2 resolution;
+uniform sampler2D uSampler;
 
 void main() {
-	gl_FragColor = vec4(
-		gl_FragCoord.x / resolution.x,
-		gl_FragCoord.y / resolution.y,
-		mod(time/100.,1.),
-		1.0
-	);
+	vec2 p = gl_FragCoord.xy/resolution;
+	vec3 color = texture2D(uSampler, p).rgb;
+	gl_FragColor = vec4(color, 1.0);
 }

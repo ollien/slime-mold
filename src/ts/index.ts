@@ -1,44 +1,47 @@
 import * as glNow from 'gl-now';
-import * as glShader from 'gl-shader';
+import ndarray from 'ndarray';
 import renderShaderSource from '@shader/render.frag'; // eslint-disable-line import/no-unresolved
-import triangleShaderSource from '@shader/triangles.vert'; // eslint-disable-line import/no-unresolved
+import lifeShaderSource from '@shader/life.frag'; // eslint-disable-line import/no-unresolved
+import TwoFBOSimulation from './twofbosimulation';
 
-// Normally this is done in the require statement, but because we use ES6 syntax, we must create the shell for gl-now.
-const shell = glNow();
-// TODO: Make this not a global
-let renderShader = null;
+/**
+ * Make a random array of white/black pixels (represented as 255/0)
+ * @param rows The number of rows to put in the result.
+ * @param cols The number of cols to put in the result.
+ */
+function makeRandomData(rows: number, cols: number): ndarray<number> {
+	if (rows < 0 || cols < 0) {
+		throw Error('Rows and Cols must be positive');
+	}
 
-shell.on('gl-init', () => {
-	// eslint-disable-next-line prefer-destructuring
-	const gl: WebGLRenderingContext = shell.gl;
+	const values: number[] = [];
+	for (let i = 0; i < rows * cols * 4; i++) {
+		if (i % 4 === 3) {
+			values[i] = 255;
+		} else {
+			values[i] = Math.random() > 0.75 ? 255 : 0;
+		}
+	}
 
-	renderShader = glShader(gl, triangleShaderSource, renderShaderSource);
+	return ndarray(new Uint8Array(values), [rows, cols, 4]);
+}
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-	const triangles = new Float32Array([
-		-1, -1,
-		1, -1,
-		-1, 1,
-		-1, 1,
-		1, -1,
-		1, 1,
-	]);
-
-	gl.bufferData(gl.ARRAY_BUFFER, triangles, gl.STATIC_DRAW);
-});
-
-let time = 0;
-shell.on('gl-render', () => {
-	// eslint-disable-next-line prefer-destructuring
-	const gl: WebGLRenderingContext = shell.gl;
-
-	renderShader.bind();
-	renderShader.uniforms.time = time;
-	renderShader.uniforms.resolution = [gl.drawingBufferWidth, gl.drawingBufferHeight];
-	renderShader.attributes.a_position.pointer();
-	gl.drawArrays(gl.TRIANGLES, 0, 6);
-	time++;
-});
+/**
+ * Setup the simulation with a random pattern.
+ *
+ * @param gl The WebGL rendering context in use.
+ * @param simulation The simulation to write to the FBO of.
+ */
+function setupSimulationPattern(gl: WebGLRenderingContext, simulation: TwoFBOSimulation): void {
+	const nextFBO = simulation.getNextReadFBO();
+	const randomData = makeRandomData(gl.drawingBufferWidth, gl.drawingBufferHeight);
+	nextFBO.color[0].setPixels(randomData);
+}
 
 window.addEventListener('load', () => {
+	const shell = glNow();
+	const simulation = new TwoFBOSimulation(shell, renderShaderSource, lifeShaderSource);
+	simulation.start().then(() => {
+		setupSimulationPattern(shell.gl, simulation);
+	});
 });

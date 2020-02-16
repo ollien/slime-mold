@@ -5,15 +5,22 @@
   "scripts": {},
   "author": "ollien",
   "dependencies": {
+    "@types/ndarray": "^1.0.7",
+    "gl-fbo": "^2.0.5",
     "gl-now": "^1.4.0",
-    "gl-shader": "^4.2.1"
+    "gl-shader": "^4.2.1",
+    "ndarray": "^1.0.19"
   },
   "devDependencies": {
+    "@types/gl-shader": "^4.2.0",
+    "@types/gl-texture2d": "^2.1.2",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.1",
+    "//": "This is only a dev dependency so TS doesn't have to worry about its existence. It is only used for type imports, but until 3.8, there is no ability for TS to just import types",
+    "gl-texture2d": "^2.1.0",
     "glslify": "^7.0.0",
     "glslify-loader": "^2.0.0",
     "raw-loader": "^4.0.0",
