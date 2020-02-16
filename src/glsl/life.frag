@@ -90,8 +90,9 @@ void main() {
 	vec3 val = get_new_value_from_movement();
 	vec2 movement_pos = get_coord_from_angle(vec2(0.), self.g);
 	if (self.r > 0. && movement_pos != vec2(0.)) {
-		val = vec3(1., 1., 0.);
+		// Set the "alive" component to zero.
+		val = vec3(self.r, self.g, 0.);
 	}
 
-	gl_FragColor = vec4(val, 1.0 );
+	gl_FragColor = vec4(val, 1.0);
 }

@@ -16,7 +16,7 @@ function makeRandomData(rows: number, cols: number): ndarray<number> {
 
 	const values: number[] = Array(rows * cols * 4).fill(0);
 	for (let i = 0; i < values.length; i += 4) {
-		if (Math.random() > 0.99) {
+		if (Math.random() > 0.9999) {
 			values[i + 0] = 255;
 			values[i + 1] = Math.random() * 255;
 			values[i + 2] = 255;
