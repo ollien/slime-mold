@@ -2,7 +2,11 @@
   "name": "cs-420x-assignment-3",
   "version": "0.1.0",
   "description": "Slime Mold Simulation",
-  "scripts": {},
+  "scripts": {
+    "build": "webpack --config webpack.prod.js",
+    "start": "npm run web-server && webpack --watch --config webpack.dev.js",
+    "web-server": "http-server -a 127.0.0.1 -p 8000 ./ &"
+  },
   "author": "ollien",
   "dependencies": {
     "@types/ndarray": "^1.0.7",
@@ -23,10 +27,12 @@
     "gl-texture2d": "^2.1.0",
     "glslify": "^7.0.0",
     "glslify-loader": "^2.0.0",
+    "http-server": "^0.12.1",
     "raw-loader": "^4.0.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.5",
     "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "webpack-merge": "^4.2.2"
   }
 }

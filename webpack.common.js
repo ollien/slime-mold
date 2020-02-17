@@ -2,7 +2,6 @@ module.exports = {
 	entry: {
 		index: ['./src/ts/index.ts'],
 	},
-	devtool: 'eval-source-map',
 	output: {
 		filename: '[name].generated.js',
 		path: `${__dirname}/static/js`,
@@ -12,6 +11,7 @@ module.exports = {
 			{
 				test: /\.ts$/,
 				use: 'ts-loader',
+				exclude: /node_modules/,
 			},
 			{
 				test: /\.(glsl|vert|frag)$/,
@@ -19,6 +19,7 @@ module.exports = {
 					'raw-loader',
 					'glslify-loader',
 				],
+				exclude: /node_modules/,
 			},
 		],
 	},
@@ -28,4 +29,4 @@ module.exports = {
 			'@shader': `${__dirname}/src/glsl/`,
 		},
 	},
-}
+};
