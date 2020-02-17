@@ -16,7 +16,7 @@ uniform sampler2D simulation_texture;
 #define STEP_SIZE length(STEP_SIZE_VEC)
 
 // Paper said this should be 0.1, but that was found to be a fading a bit quickly.
-#define DECAY_FACTOR (1.-0.009)
+#define DECAY_FACTOR (1.-0.05)
 
 
 vec2 uvN() {
