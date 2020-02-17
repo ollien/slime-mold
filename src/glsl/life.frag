@@ -12,9 +12,16 @@ uniform sampler2D simulation_texture;
 #define ROTATION_ANGLE 45.
 #define OFFSET 9.
 #define THRESHOLD 0.
+#define STEP_SIZE_VEC 1./resolution
+#define STEP_SIZE length(STEP_SIZE_VEC)
 
 // Paper said this should be 0.1, but that was found to be a fading a bit quickly.
 #define DECAY_FACTOR (1.-0.009)
+
+
+vec2 uvN() {
+	return gl_FragCoord.xy / resolution;
+}
 
 /**
  * Convert a coordinate that's in relative pixels to the current pixel to one within the [0, 1] bounds.
@@ -47,7 +54,7 @@ float relative_angle_to_rads(float angle) {
 vec2 get_coord_from_angle(vec2 pos, float angle) {
 	float angle_in_rads = relative_angle_to_rads(angle);
 
-	return pos + vec2(cos(angle_in_rads), sin(angle_in_rads));
+	return pos + STEP_SIZE_VEC * vec2(cos(angle_in_rads), sin(angle_in_rads));
 }
 
 /**
@@ -90,10 +97,10 @@ vec3 get_new_value_from_movement() {
 				continue;
 			}
 
-			vec2 candidate_position = vec2(float(i), float(j));
+			vec2 candidate_position = scale_relative_coords(vec2(i, j));
 			vec2 candidate_attempted_position = get_coord_from_angle(candidate_position, candidate.g);
-			// If the candidate is destined to move to us (within 0.5 of our center), return their value;
-			if (abs(candidate_attempted_position.x) < .5 && abs(candidate_attempted_position.y) < .5) {
+			// Also tried doing this with distance, to no avail :(
+			if (abs(candidate_attempted_position.x - uvN().x) < STEP_SIZE_VEC.x && abs(candidate_attempted_position.y - uvN().y) < STEP_SIZE_VEC.y) {
 				return candidate;
 			}
 		}
