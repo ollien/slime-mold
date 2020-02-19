@@ -17,7 +17,7 @@ export class Flipper<T> {
 	 * Flip front and back, then return what was currently the "front"
 	 */
 	flip(): T {
-		const current = this.peekFront();
+		const current = this.sides[0];
 		this.sides.reverse();
 
 		return current;
