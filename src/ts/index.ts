@@ -29,6 +29,7 @@ interface SimulationProperties {
 	color: [number, number, number],
 	dragPosition: [number, number],
 	disturbRadius: number,
+	paused: boolean
 }
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
@@ -71,7 +72,7 @@ function makeRandomData(numRandomItems: number, length: number): number[] {
 }
 
 /**
- * Sets up the GUI needed to control the simulation
+ * Sets up the GUI needed to control the simulation.
  *
  * @param controlObject The object whose properties will control the simulation.
  */
@@ -82,6 +83,7 @@ function setupSimulationGUI(controlObject: SimulationProperties) {
 	gui.add(controlObject, 'sensorAngle', 0, 90);
 	gui.add(controlObject, 'rotateAngle', 0, 90);
 	gui.add(controlObject, 'disturbRadius', 0, 64);
+	gui.add(controlObject, 'paused');
 	gui.addColor(controlObject, 'color');
 }
 
@@ -144,6 +146,7 @@ window.addEventListener('load', () => {
 		color: [255, 255, 255],
 		dragPosition: [-1, -1],
 		disturbRadius: 32,
+		paused: false
 	};
 
 	setupSimulationGUI(simulationProperties);
@@ -192,6 +195,7 @@ window.addEventListener('load', () => {
 			rotate_angle_deg: regl.prop<SimulationProperties, 'rotateAngle'>('rotateAngle'),
 			mouse_drag_position: regl.prop<SimulationProperties, 'dragPosition'>('dragPosition'),
 			disturb_radius: regl.prop<SimulationProperties, 'disturbRadius'>('disturbRadius'),
+			paused: regl.prop<SimulationProperties, 'paused'>('paused'),
 		},
 		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});

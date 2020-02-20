@@ -12,6 +12,7 @@ uniform float sensor_angle_deg;
 uniform float rotate_angle_deg;
 uniform vec2 mouse_drag_position;
 uniform float disturb_radius;
+uniform bool paused;
 
 uniform vec2 resolution;
 uniform sampler2D simulation_texture;
@@ -85,7 +86,7 @@ void main() {
 
 	float cell_angle = relative_angle_to_rads(res.b);
 	float movement_angle = get_movement_angle(res.xy, cell_angle);
-	vec2 offset = get_position_offset_from_angle(res.xy, movement_angle);
+	vec2 offset = paused ? vec2(0.) : get_position_offset_from_angle(res.xy, movement_angle);
 	vec2 disturb_offset = get_offset_from_disturb_center(res.xy);
 	if (disturb_offset != vec2(-1.) && length(disturb_offset) < length(vec2(disturb_radius)/resolution)) {
 		// Divide this by sixteen so it takes a few frames for things to move out of the way
