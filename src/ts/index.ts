@@ -26,6 +26,7 @@ interface SimulationProperties {
 	sensorDistance: number,
 	sensorAngle: number,
 	rotateAngle: number,
+	color: [number, number, number],
 }
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
@@ -73,6 +74,7 @@ function setupSimulationGUI(controlObject: SimulationProperties) {
 	gui.add(controlObject, 'sensorDistance', 0, 50);
 	gui.add(controlObject, 'sensorAngle', 0, 90);
 	gui.add(controlObject, 'rotateAngle', 0, 90);
+	gui.addColor(controlObject, 'color');
 }
 
 /**
@@ -100,6 +102,7 @@ window.addEventListener('load', () => {
 		sensorDistance: 9,
 		sensorAngle: 22.5,
 		rotateAngle: 45,
+		color: [255, 255, 255],
 	};
 	setupSimulationGUI(simulationProperties);
 
@@ -178,6 +181,7 @@ window.addEventListener('load', () => {
 	const renderSimulation = regl({
 		frag: renderTextureShaderSource,
 		uniforms: {
+			color: regl.prop<SimulationProperties, 'color'>('color'),
 			in_texture: (): Framebuffer => depositStates.peekFront(),
 		},
 	});
@@ -208,7 +212,7 @@ window.addEventListener('load', () => {
 			// Render and fade the old cells
 			renderDeposits();
 			// Render the whole thing to the screen.
-			renderSimulation();
+			renderSimulation(simulationProperties);
 		});
 
 		// Flip the buffers
