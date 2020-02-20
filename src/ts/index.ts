@@ -2,13 +2,22 @@ import reglModule, { Framebuffer } from 'regl'; // eslint-disable-line no-unused
 import lodash from 'lodash';
 import renderTextureShaderSource from '@shader/rendertexture.frag'; // eslint-disable-line import/no-unresolved
 import renderCellShaderSource from '@shader/rendercells.frag'; // eslint-disable-line import/no-unresolved
+import depositShaderSource from '@shader/deposit.frag'; // eslint-disable-line import/no-unresolved
 import renderCellVertexShaderSource from '@shader/rendercells.vert'; // eslint-disable-line import/no-unresolved
 import lifeShaderSource from '@shader/life.frag'; // eslint-disable-line import/no-unresolved
-import vertexShaderSource from '@shader/triangles.vert'; // eslint-disable-line import/no-unresolved
+import triangleVertexShaderSource from '@shader/triangles.vert'; // eslint-disable-line import/no-unresolved
 import { Flipper } from './flipper';
 
 const CANVAS_ID = 'gl';
 const NUM_AGENTS = 50;
+const RENDER_TRIANGLE_VERTS = [
+	[-1, -1],
+	[1, -1],
+	[-1, 1],
+	[-1, 1],
+	[1, -1],
+	[1, 1],
+];
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
 	const html = document.querySelector('html');
@@ -65,69 +74,99 @@ window.addEventListener('load', () => {
 	const canvas = <HTMLCanvasElement>document.getElementById(CANVAS_ID);
 	setCanvasSize(canvas);
 
-	const regl = reglModule(`#${CANVAS_ID}`);
+	const regl = reglModule({ canvas, extensions: ['OES_texture_float', 'WEBGL_color_buffer_float'] });
 	function makeFBO(data: number[]): Framebuffer {
 		const { width, height } = canvas;
 		return regl.framebuffer({
 			width,
 			height,
+			colorType: 'float',
 			color: regl.texture({
 				width,
 				height,
 				data,
+				format: 'rgba',
+				// unit8 is not precise enough for the angle calculations that are required.
+				type: 'float',
 			}),
 			depthStencil: false,
 		});
 	}
 
 	const data = makeRandomData(canvas.width, canvas.height);
-	const states = new Flipper<Framebuffer>(makeFBO(data), makeFBO(data));
+	const simulationStates = new Flipper<Framebuffer>(makeFBO(data), makeFBO(data));
+	const emptyData = Array(canvas.width * canvas.height * 4).fill(0);
+	const cellStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
+	const depositStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
+
 	const runSimulation = regl({
 		frag: lifeShaderSource,
-		framebuffer: (): Framebuffer => states.peekBack(),
-	});
-
-	const renderSimulation = regl({
-		frag: renderTextureShaderSource,
-		vert: vertexShaderSource,
+		vert: triangleVertexShaderSource,
 		attributes: {
-			a_position: [
-				[-1, -1],
-				[1, -1],
-				[-1, 1],
-				[-1, 1],
-				[1, -1],
-				[1, 1],
-			],
+			a_position: RENDER_TRIANGLE_VERTS,
 		},
+		count: RENDER_TRIANGLE_VERTS.length,
 		uniforms: {
-			simulation_texture: (): Framebuffer => states.peekFront(),
+			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
 			resolution: [canvas.width, canvas.height],
 		},
-		depth: { enable: false },
-		count: 6,
+		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});
 
 	const cellVertices = makeCellVertices(canvas.width, canvas.height);
 	const renderCells = regl({
 		frag: renderCellShaderSource,
 		vert: renderCellVertexShaderSource,
+		framebuffer: (): Framebuffer => cellStates.peekBack(),
 		attributes: {
-			// a_position: cellVertices,
 			a_position: cellVertices,
 		},
 		depth: { enable: false },
-		uniforms: { simulation_texture: states.peekFront() },
+		uniforms: {
+			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
+			resolution: [canvas.width, canvas.height],
+		},
 		count: cellVertices.length,
 		primitive: 'points',
 	});
 
+	const renderDeposits = regl({
+		frag: depositShaderSource,
+		vert: triangleVertexShaderSource,
+		framebuffer: (): Framebuffer => depositStates.peekBack(),
+		attributes: {
+			a_position: RENDER_TRIANGLE_VERTS,
+		},
+		count: RENDER_TRIANGLE_VERTS.length,
+		uniforms: {
+			cell_texture: (): Framebuffer => cellStates.peekFront(),
+			feedback_texture: (): Framebuffer => depositStates.peekFront(),
+			resolution: [canvas.width, canvas.height],
+		},
+	});
+
+	const renderSimulation = regl({
+		frag: renderTextureShaderSource,
+		vert: triangleVertexShaderSource,
+		attributes: {
+			a_position: RENDER_TRIANGLE_VERTS,
+		},
+		count: RENDER_TRIANGLE_VERTS.length,
+		uniforms: {
+			tex: (): Framebuffer => depositStates.peekFront(),
+			resolution: [canvas.width, canvas.height],
+		},
+		depth: { enable: false },
+	});
+
+
 	regl.frame(() => {
-		renderSimulation(() => {
-			regl.draw();
-			runSimulation();
-			states.flip();
-		});
+		runSimulation();
 		renderCells();
+		renderDeposits();
+		renderSimulation();
+		simulationStates.flip();
+		cellStates.flip();
+		depositStates.flip();
 	});
 });

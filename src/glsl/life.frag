@@ -3,7 +3,7 @@ precision highp float;
 #endif
 
 #define PI 3.14159
-#define STEP_SIZE 1.2
+#define STEP_SIZE 1.
 
 uniform vec2 resolution;
 uniform sampler2D simulation_texture;
@@ -30,7 +30,8 @@ void main() {
 	res.g = mod(res.g + offset.y, 1.);
 
 	// If a pixel was already not part of the simulation, we don't want to put it into the simulation.
-	res *= res.a;
+	// This step function shouldn't be needed, but due to floating point precision issues, simply doing a *= res.a will not work.
+	res *= step(0., res.a);
 
 	gl_FragColor = res;
 }
