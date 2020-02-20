@@ -22,7 +22,7 @@ vec4 get_simulation_value(vec2 coords) {
 }
 
 float get_deposit_value(vec2 coords) {
-	return length(texture2D(deposit_texture, coords).rgb);
+	return length(texture2D(deposit_texture, mod(coords, 1.)).rgb);
 }
 
 float relative_angle_to_rads(float angle) {
