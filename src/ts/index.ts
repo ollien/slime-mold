@@ -9,7 +9,8 @@ import triangleVertexShaderSource from '@shader/triangles.vert'; // eslint-disab
 import { Flipper } from './flipper';
 
 const CANVAS_ID = 'gl';
-const NUM_AGENTS = 50;
+// const NUM_AGENTS = 5000;
+const AGENT_PERCENTAGE = 0.10;
 const RENDER_TRIANGLE_VERTS = [
 	[-1, -1],
 	[1, -1],
@@ -39,15 +40,15 @@ function setCanvasSize(canvas: HTMLCanvasElement): void {
  */
 function makeRandomData(width: number, height: number): number[] {
 	const values = Array(width * height).fill(0).map((_, index): [number, number, number, number] => {
-		if (index >= NUM_AGENTS) {
+		if (index >= (width * height) * AGENT_PERCENTAGE) {
 			return [0, 0, 0, 0];
 		}
 
 		return [
-			Math.random() * 255,
-			Math.random() * 255,
-			Math.random() * 255,
-			255,
+			Math.random(),
+			Math.random(),
+			Math.random(),
+			1,
 		];
 	});
 
@@ -107,6 +108,7 @@ window.addEventListener('load', () => {
 		},
 		count: RENDER_TRIANGLE_VERTS.length,
 		uniforms: {
+			deposit_texture: (): Framebuffer => depositStates.peekBack(),
 			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
 			resolution: [canvas.width, canvas.height],
 		},
