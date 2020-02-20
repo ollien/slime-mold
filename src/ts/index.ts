@@ -161,6 +161,9 @@ window.addEventListener('load', () => {
 
 
 	regl.frame(() => {
+		// Make sure we clear any cells that existed on the last frame
+		regl.clear({ color: [0, 0, 0, 0], framebuffer: cellStates.peekBack() });
+
 		runSimulation();
 		renderCells();
 		renderDeposits();
