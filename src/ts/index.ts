@@ -10,7 +10,7 @@ import triangleVertexShaderSource from '@shader/triangles.vert'; // eslint-disab
 import { Flipper } from './flipper';
 
 const CANVAS_ID = 'gl';
-const AGENT_PERCENTAGE = 0.10;
+const CELL_PERCENTAGE = 0.10;
 const RENDER_TRIANGLE_VERTS = [
 	[-1, -1],
 	[1, -1],
@@ -40,18 +40,22 @@ function setCanvasSize(canvas: HTMLCanvasElement): void {
 }
 
 /**
- * Generates random up to NUM_AGENTS random pixels of the following form.
+ * Generates random up to n random pixels of the following form.
  * 	r: x coordinate
  * 	g: y coordinate
  * 	b: z coordinate
  *  a: 1 if the pixel is part of the simulation, 0 otherwise.
  *
- * @param width The width of the data to write to.
- * @param height The height of the data to write to.
+ * @param numRandomItems The number of items to generate. Must be <= length.
+ * @param length The size of the array to generate. Will be padded with zeroes.
  */
-function makeRandomData(width: number, height: number): number[] {
-	const values = Array(width * height).fill(0).map((_, index): [number, number, number, number] => {
-		if (index >= (width * height) * AGENT_PERCENTAGE) {
+function makeRandomData(numRandomItems: number, length: number): number[] {
+	if (numRandomItems > length) {
+		throw Error('Attempted to generate more random items than array length');
+	}
+
+	const values = Array(length).fill(0).map((_, index): [number, number, number, number] => {
+		if (index >= numRandomItems) {
 			return [0, 0, 0, 0];
 		}
 
@@ -168,7 +172,8 @@ window.addEventListener('load', () => {
 		});
 	}
 
-	const data = makeRandomData(canvas.width, canvas.height);
+	const numPixels = canvas.width * canvas.height;
+	const data = makeRandomData(numPixels * CELL_PERCENTAGE, numPixels);
 	const simulationStates = new Flipper<Framebuffer>(makeFBO(data), makeFBO(data));
 	const emptyData = Array(canvas.width * canvas.height * 4).fill(0);
 	const cellStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
