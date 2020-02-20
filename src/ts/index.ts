@@ -76,6 +76,10 @@ window.addEventListener('load', () => {
 	setCanvasSize(canvas);
 
 	const regl = reglModule({ canvas, extensions: ['OES_texture_float', 'WEBGL_color_buffer_float'] });
+	/**
+	 *  Makes an FBO with the settings needed to run the simulation.
+	 * @param data The data to use for the FBO
+	 */
 	function makeFBO(data: number[]): Framebuffer {
 		const { width, height } = canvas;
 		return regl.framebuffer({
@@ -100,6 +104,7 @@ window.addEventListener('load', () => {
 	const cellStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
 	const depositStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
 
+	// Runs the simulation's calculations, calculating cell positions as needed.
 	const runSimulation = regl({
 		frag: lifeShaderSource,
 		vert: triangleVertexShaderSource,
@@ -116,6 +121,7 @@ window.addEventListener('load', () => {
 	});
 
 	const cellVertices = makeCellVertices(canvas.width, canvas.height);
+	// Renders the cells each as a vertex on the screen
 	const renderCells = regl({
 		frag: renderCellShaderSource,
 		vert: renderCellVertexShaderSource,
@@ -132,6 +138,7 @@ window.addEventListener('load', () => {
 		primitive: 'points',
 	});
 
+	// Renders the deposits from the cells, which is just the cells fed back into a texture.
 	const renderDeposits = regl({
 		frag: depositShaderSource,
 		vert: triangleVertexShaderSource,
@@ -147,6 +154,7 @@ window.addEventListener('load', () => {
 		},
 	});
 
+	// Renders the entire simulation to the screen
 	const renderSimulation = regl({
 		frag: renderTextureShaderSource,
 		vert: triangleVertexShaderSource,
