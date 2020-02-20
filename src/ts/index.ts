@@ -27,6 +27,8 @@ interface SimulationProperties {
 	sensorAngle: number,
 	rotateAngle: number,
 	color: [number, number, number],
+	dragPosition: [number, number],
+	disturbRadius: number,
 }
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
@@ -42,7 +44,7 @@ function setCanvasSize(canvas: HTMLCanvasElement): void {
  * 	r: x coordinate
  * 	g: y coordinate
  * 	b: z coordinate
- *  a: 255 if the pixel is part of the simulation, 0 otherwise.
+ *  a: 1 if the pixel is part of the simulation, 0 otherwise.
  *
  * @param width The width of the data to write to.
  * @param height The height of the data to write to.
@@ -66,6 +68,7 @@ function makeRandomData(width: number, height: number): number[] {
 
 /**
  * Sets up the GUI needed to control the simulation
+ *
  * @param controlObject The object whose properties will control the simulation.
  */
 function setupSimulationGUI(controlObject: SimulationProperties) {
@@ -74,11 +77,43 @@ function setupSimulationGUI(controlObject: SimulationProperties) {
 	gui.add(controlObject, 'sensorDistance', 0, 50);
 	gui.add(controlObject, 'sensorAngle', 0, 90);
 	gui.add(controlObject, 'rotateAngle', 0, 90);
+	gui.add(controlObject, 'disturbRadius', 0, 64);
 	gui.addColor(controlObject, 'color');
 }
 
 /**
+ * Sets up an event to update the controlObject with the current drag position of the mouse.
+ *
+ * @param eventTarget The element to drag on
+ * @param controlObject The object whose properties will control the simulation.
+ */
+function setupMouseDragControl(eventTarget: HTMLElement, controlObject: SimulationProperties) {
+	function assignPositionToController(event: MouseEvent) {
+		const { height, width } = eventTarget.getBoundingClientRect();
+		// eslint-disable-next-line no-param-reassign
+		controlObject.dragPosition = [
+			event.x / width,
+			// Our shader expects zero to be the bottom, but the event has zero be the top.
+			1 - event.y / height,
+		];
+	}
+
+	eventTarget.addEventListener('mousedown', assignPositionToController);
+	eventTarget.addEventListener('mousemove', (event: MouseEvent) => {
+		if (event.buttons & 1) {
+			assignPositionToController(event);
+		}
+	});
+
+	eventTarget.addEventListener('mouseup', () => {
+		// eslint-disable-next-line no-param-reassign
+		controlObject.dragPosition = [-1, -1];
+	});
+}
+
+/**
  * Make one vertex for each cell, with coordinates for each cell.
+ *
  * @param width The width of the rendering output
  * @param height The height of the rendering output
  */
@@ -103,8 +138,12 @@ window.addEventListener('load', () => {
 		sensorAngle: 22.5,
 		rotateAngle: 45,
 		color: [255, 255, 255],
+		dragPosition: [-1, -1],
+		disturbRadius: 32,
 	};
+
 	setupSimulationGUI(simulationProperties);
+	setupMouseDragControl(canvas, simulationProperties);
 
 	const regl = reglModule({ canvas, extensions: ['OES_texture_float', 'WEBGL_color_buffer_float'] });
 	/**
@@ -146,6 +185,8 @@ window.addEventListener('load', () => {
 			sensor_distance_multiplier: regl.prop<SimulationProperties, 'sensorDistance'>('sensorDistance'),
 			sensor_angle_deg: regl.prop<SimulationProperties, 'sensorAngle'>('sensorAngle'),
 			rotate_angle_deg: regl.prop<SimulationProperties, 'rotateAngle'>('rotateAngle'),
+			mouse_drag_position: regl.prop<SimulationProperties, 'dragPosition'>('dragPosition'),
+			disturb_radius: regl.prop<SimulationProperties, 'disturbRadius'>('disturbRadius'),
 		},
 		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});
