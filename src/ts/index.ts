@@ -10,7 +10,6 @@ import triangleVertexShaderSource from '@shader/triangles.vert'; // eslint-disab
 import { Flipper } from './flipper';
 
 const CANVAS_ID = 'gl';
-// const NUM_AGENTS = 5000;
 const AGENT_PERCENTAGE = 0.10;
 const RENDER_TRIANGLE_VERTS = [
 	[-1, -1],
@@ -136,15 +135,9 @@ window.addEventListener('load', () => {
 	// Runs the simulation's calculations, calculating cell positions as needed.
 	const runSimulation = regl({
 		frag: lifeShaderSource,
-		vert: triangleVertexShaderSource,
-		attributes: {
-			a_position: RENDER_TRIANGLE_VERTS,
-		},
-		count: RENDER_TRIANGLE_VERTS.length,
 		uniforms: {
 			deposit_texture: (): Framebuffer => depositStates.peekBack(),
 			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
-			resolution: [canvas.width, canvas.height],
 			// The type definitions for the properties state we must specify the key in the argument and the generic.
 			step_size: regl.prop<SimulationProperties, 'stepSize'>('stepSize'),
 			sensor_distance_multiplier: regl.prop<SimulationProperties, 'sensorDistance'>('sensorDistance'),
@@ -163,44 +156,30 @@ window.addEventListener('load', () => {
 		attributes: {
 			a_position: cellVertices,
 		},
-		depth: { enable: false },
-		uniforms: {
-			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
-			resolution: [canvas.width, canvas.height],
-		},
 		count: cellVertices.length,
+		uniforms: {
+			resolution: [canvas.width, canvas.height],
+			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
+		},
 		primitive: 'points',
 	});
 
 	// Renders the deposits from the cells, which is just the cells fed back into a texture.
 	const renderDeposits = regl({
 		frag: depositShaderSource,
-		vert: triangleVertexShaderSource,
 		framebuffer: (): Framebuffer => depositStates.peekBack(),
-		attributes: {
-			a_position: RENDER_TRIANGLE_VERTS,
-		},
-		count: RENDER_TRIANGLE_VERTS.length,
 		uniforms: {
 			cell_texture: (): Framebuffer => cellStates.peekFront(),
 			feedback_texture: (): Framebuffer => depositStates.peekFront(),
-			resolution: [canvas.width, canvas.height],
 		},
 	});
 
 	// Renders the entire simulation to the screen
 	const renderSimulation = regl({
 		frag: renderTextureShaderSource,
-		vert: triangleVertexShaderSource,
-		attributes: {
-			a_position: RENDER_TRIANGLE_VERTS,
-		},
-		count: RENDER_TRIANGLE_VERTS.length,
 		uniforms: {
-			tex: (): Framebuffer => depositStates.peekFront(),
-			resolution: [canvas.width, canvas.height],
+			in_texture: (): Framebuffer => depositStates.peekFront(),
 		},
-		depth: { enable: false },
 	});
 
 
@@ -208,14 +187,29 @@ window.addEventListener('load', () => {
 		// Make sure we clear any cells that existed on the last frame
 		regl.clear({ color: [0, 0, 0, 0], framebuffer: cellStates.peekBack() });
 
-		// Pass the properties to the simulation as regl properties
-		runSimulation(simulationProperties);
-		// Render the cells as verts to the framebuffer
-		renderCells();
-		// Render and fade the old cells
-		renderDeposits();
-		// Render the whole thing to the screen.
-		renderSimulation();
+		regl({
+			// All commands (except for renderCells) will use this vertex shader with the triangle attributes
+			vert: triangleVertexShaderSource,
+			attributes: {
+				a_position: RENDER_TRIANGLE_VERTS,
+			},
+			count: RENDER_TRIANGLE_VERTS.length,
+			// All commands will use the resolution uniform
+			uniforms: {
+				resolution: [canvas.width, canvas.height],
+			},
+			// None of the shaders need depth calculations
+			depth: { enable: false },
+		})(() => {
+			// Pass the properties to the simulation as regl properties
+			runSimulation(simulationProperties);
+			// Render the cells as verts to the framebuffer
+			renderCells();
+			// Render and fade the old cells
+			renderDeposits();
+			// Render the whole thing to the screen.
+			renderSimulation();
+		});
 
 		// Flip the buffers
 		simulationStates.flip();
