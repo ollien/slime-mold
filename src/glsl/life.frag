@@ -94,8 +94,8 @@ void main() {
 	}
 
 	vec2 new_pos = res.xy + offset;
-	res.r = fract(new_pos.x);
-	res.g = fract(new_pos.y);
+	res.r = mod(new_pos.x, 1.);
+	res.g = mod(new_pos.y, 1.);
 
 	// If a pixel was already not part of the simulation, we don't want to put it into the simulation.
 	// This step function shouldn't be needed, but due to floating point precision issues, simply doing a *= res.a will not work.
