@@ -1,4 +1,5 @@
 import reglModule, { Framebuffer } from 'regl'; // eslint-disable-line no-unused-vars
+import dat from 'dat.gui';
 import lodash from 'lodash';
 import renderTextureShaderSource from '@shader/rendertexture.frag'; // eslint-disable-line import/no-unresolved
 import renderCellShaderSource from '@shader/rendercells.frag'; // eslint-disable-line import/no-unresolved
@@ -19,6 +20,14 @@ const RENDER_TRIANGLE_VERTS = [
 	[1, -1],
 	[1, 1],
 ];
+
+// Represents properties that can be varied in the simulation.
+interface SimulationProperties {
+	stepSize: number,
+	sensorDistance: number,
+	sensorAngle: number,
+	rotateAngle: number,
+}
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
 	const html = document.querySelector('html');
@@ -56,6 +65,18 @@ function makeRandomData(width: number, height: number): number[] {
 }
 
 /**
+ * Sets up the GUI needed to control the simulation
+ * @param controlObject The object whose properties will control the simulation.
+ */
+function setupSimulationGUI(controlObject: SimulationProperties) {
+	const gui = new dat.GUI();
+	gui.add(controlObject, 'stepSize', 0, 10);
+	gui.add(controlObject, 'sensorDistance', 0, 50);
+	gui.add(controlObject, 'sensorAngle', 0, 90);
+	gui.add(controlObject, 'rotateAngle', 0, 90);
+}
+
+/**
  * Make one vertex for each cell, with coordinates for each cell.
  * @param width The width of the rendering output
  * @param height The height of the rendering output
@@ -74,6 +95,14 @@ function makeCellVertices(width: number, height: number): [number, number][] {
 window.addEventListener('load', () => {
 	const canvas = <HTMLCanvasElement>document.getElementById(CANVAS_ID);
 	setCanvasSize(canvas);
+
+	const simulationProperties: SimulationProperties = {
+		stepSize: 1.1,
+		sensorDistance: 9,
+		sensorAngle: 22.5,
+		rotateAngle: 45,
+	};
+	setupSimulationGUI(simulationProperties);
 
 	const regl = reglModule({ canvas, extensions: ['OES_texture_float', 'WEBGL_color_buffer_float'] });
 	/**
@@ -116,6 +145,11 @@ window.addEventListener('load', () => {
 			deposit_texture: (): Framebuffer => depositStates.peekBack(),
 			simulation_texture: (): Framebuffer => simulationStates.peekFront(),
 			resolution: [canvas.width, canvas.height],
+			// The type definitions for the properties state we must specify the key in the argument and the generic.
+			step_size: regl.prop<SimulationProperties, 'stepSize'>('stepSize'),
+			sensor_distance_multiplier: regl.prop<SimulationProperties, 'sensorDistance'>('sensorDistance'),
+			sensor_angle_deg: regl.prop<SimulationProperties, 'sensorAngle'>('sensorAngle'),
+			rotate_angle_deg: regl.prop<SimulationProperties, 'rotateAngle'>('rotateAngle'),
 		},
 		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});
@@ -174,10 +208,16 @@ window.addEventListener('load', () => {
 		// Make sure we clear any cells that existed on the last frame
 		regl.clear({ color: [0, 0, 0, 0], framebuffer: cellStates.peekBack() });
 
-		runSimulation();
+		// Pass the properties to the simulation as regl properties
+		runSimulation(simulationProperties);
+		// Render the cells as verts to the framebuffer
 		renderCells();
+		// Render and fade the old cells
 		renderDeposits();
+		// Render the whole thing to the screen.
 		renderSimulation();
+
+		// Flip the buffers
 		simulationStates.flip();
 		cellStates.flip();
 		depositStates.flip();
