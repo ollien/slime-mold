@@ -13,6 +13,7 @@ uniform float rotate_angle_deg;
 uniform vec2 mouse_drag_position;
 uniform float disturb_radius;
 uniform bool paused;
+uniform bool pull_inwards;
 
 uniform vec2 resolution;
 uniform sampler2D simulation_texture;
@@ -92,6 +93,9 @@ void main() {
 		// Divide this by sixteen so it takes a few frames for things to move out of the way
 		float disturb_multiplier = disturb_radius/16.;
 		offset = disturb_multiplier/resolution * vec2(sign(disturb_offset.x), sign(disturb_offset.y));
+		if (pull_inwards) {
+			offset *= -1.;
+		}
 	}
 
 	vec2 new_pos = res.xy + offset;

@@ -29,7 +29,8 @@ interface SimulationProperties {
 	color: [number, number, number],
 	dragPosition: [number, number],
 	disturbRadius: number,
-	paused: boolean
+	paused: boolean,
+	pullInwards: boolean,
 }
 
 function setCanvasSize(canvas: HTMLCanvasElement): void {
@@ -104,6 +105,13 @@ function setupMouseDragControl(eventTarget: HTMLElement, controlObject: Simulati
 		];
 	}
 
+	function assignDisturbDirectionToController(event: KeyboardEvent) {
+		controlObject.pullInwards = event.shiftKey;
+	}
+
+	document.addEventListener('keydown', assignDisturbDirectionToController);
+	document.addEventListener('keyup',  assignDisturbDirectionToController);
+
 	eventTarget.addEventListener('mousedown', assignPositionToController);
 	eventTarget.addEventListener('mousemove', (event: MouseEvent) => {
 		if (event.buttons & 1) {
@@ -146,7 +154,8 @@ window.addEventListener('load', () => {
 		color: [255, 255, 255],
 		dragPosition: [-1, -1],
 		disturbRadius: 32,
-		paused: false
+		paused: false,
+		pullInwards: false,
 	};
 
 	setupSimulationGUI(simulationProperties);
@@ -196,6 +205,7 @@ window.addEventListener('load', () => {
 			mouse_drag_position: regl.prop<SimulationProperties, 'dragPosition'>('dragPosition'),
 			disturb_radius: regl.prop<SimulationProperties, 'disturbRadius'>('disturbRadius'),
 			paused: regl.prop<SimulationProperties, 'paused'>('paused'),
+			pull_inwards: regl.prop<SimulationProperties, 'pullInwards'>('pullInwards'),
 		},
 		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});
