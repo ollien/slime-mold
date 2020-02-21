@@ -83,7 +83,7 @@ function setupSimulationGUI(controlObject: SimulationProperties) {
 	gui.add(controlObject, 'sensorDistance', 0, 50);
 	gui.add(controlObject, 'sensorAngle', 0, 90);
 	gui.add(controlObject, 'rotateAngle', 0, 90);
-	gui.add(controlObject, 'disturbRadius', 0, 64);
+	gui.add(controlObject, 'disturbRadius', 0, 256);
 	gui.add(controlObject, 'paused');
 	gui.addColor(controlObject, 'color');
 }
