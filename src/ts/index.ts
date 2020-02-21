@@ -144,8 +144,6 @@ function makeCellVertices(width: number, height: number): [number, number][] {
 
 window.addEventListener('load', () => {
 	const canvas = <HTMLCanvasElement>document.getElementById(CANVAS_ID);
-	setCanvasSize(canvas);
-
 	const simulationProperties: SimulationProperties = {
 		stepSize: 1.1,
 		sensorDistance: 9,
@@ -158,10 +156,12 @@ window.addEventListener('load', () => {
 		pullInwards: false,
 	};
 
+	setCanvasSize(canvas);
 	setupSimulationGUI(simulationProperties);
 	setupMouseDragControl(canvas, simulationProperties);
 
 	const regl = reglModule({ canvas, extensions: ['OES_texture_float', 'WEBGL_color_buffer_float'] });
+
 	/**
 	 *  Makes an FBO with the settings needed to run the simulation.
 	 * @param data The data to use for the FBO
