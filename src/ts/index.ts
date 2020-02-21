@@ -188,11 +188,20 @@ window.addEventListener('load', () => {
 
 	const numPixels = canvas.width * canvas.height;
 	const numCells = numPixels * CELL_PERCENTAGE;
-	const data = makeRandomData(numCells, numPixels);
-	const simulationStates = new Flipper<Framebuffer>(makeFBO(data), makeFBO(data));
+	const cellData = makeRandomData(numCells, numPixels);
+	const simulationStates = new Flipper<Framebuffer>(makeFBO(cellData), makeFBO(cellData));
 	const emptyData = Array(numPixels * 4).fill(0);
 	const cellStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
 	const depositStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
+
+	/**
+	 * Flip all of the Framebuffer flippers to allow for the next iteration to read the output of the current iteration.
+	 */
+	function flipBuffers() {
+		simulationStates.flip();
+		cellStates.flip();
+		depositStates.flip();
+	}
 
 	// Runs the simulation's calculations, calculating cell positions as needed.
 	const runSimulation = regl({
@@ -278,9 +287,6 @@ window.addEventListener('load', () => {
 			renderSimulation(simulationProperties);
 		});
 
-		// Flip the buffers
-		simulationStates.flip();
-		cellStates.flip();
-		depositStates.flip();
+		flipBuffers();
 	});
 });
