@@ -4,6 +4,8 @@ Slime Mold simulation. Based on [this blog post](https://sagejenson.com/physarum
 
 [Demo](https://ollien.github.io/slime-mold/)
 
+If you get poor performance with the demo, shrink your window and/or zoom in. This shader renders about 622k particles on a 1080p screen, so performance can suffer on some systems.
+
 ![Image of the simulation](https://raw.githubusercontent.com/ollien/slime-mold/master/screenshot.png?token=AAHOR72ED77AIEZUUPMKXC26LCBN4)
 
 ## Controls
