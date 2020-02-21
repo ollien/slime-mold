@@ -10,7 +10,7 @@ import triangleVertexShaderSource from '@shader/triangles.vert'; // eslint-disab
 import { Flipper } from './flipper';
 
 const CANVAS_ID = 'gl';
-const CELL_PERCENTAGE = 0.10;
+const CELL_PERCENTAGE = 0.30;
 const RENDER_TRIANGLE_VERTS = [
 	[-1, -1],
 	[1, -1],
@@ -129,13 +129,14 @@ function setupMouseDragControl(eventTarget: HTMLElement, controlObject: Simulati
 /**
  * Make one vertex for each cell, with coordinates for each cell.
  *
+ * @param n The number of vertices to make
  * @param width The width of the rendering output
  * @param height The height of the rendering output
  */
-function makeCellVertices(width: number, height: number): [number, number][] {
+function makeCellVertices(n: number, width: number, height: number): [number, number][] {
 	const res = [];
-	for (let i = 0; i < width; i++) {
-		for (let j = 0; j < height; j++) {
+	for (let i = 0; i < width && res.length < n; i++) {
+		for (let j = 0; j < height && res.length < n; j++) {
 			res.push([i / width, j / width]);
 		}
 	}
@@ -186,9 +187,10 @@ window.addEventListener('load', () => {
 	}
 
 	const numPixels = canvas.width * canvas.height;
-	const data = makeRandomData(numPixels * CELL_PERCENTAGE, numPixels);
+	const numCells = numPixels * CELL_PERCENTAGE;
+	const data = makeRandomData(numCells, numPixels);
 	const simulationStates = new Flipper<Framebuffer>(makeFBO(data), makeFBO(data));
-	const emptyData = Array(canvas.width * canvas.height * 4).fill(0);
+	const emptyData = Array(numPixels * 4).fill(0);
 	const cellStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
 	const depositStates = new Flipper<Framebuffer>(makeFBO(emptyData), makeFBO(emptyData));
 
@@ -211,7 +213,7 @@ window.addEventListener('load', () => {
 		framebuffer: (): Framebuffer => simulationStates.peekBack(),
 	});
 
-	const cellVertices = makeCellVertices(canvas.width, canvas.height);
+	const cellVertices = makeCellVertices(numCells, canvas.width, canvas.height);
 	// Renders the cells each as a vertex on the screen
 	const renderCells = regl({
 		frag: renderCellShaderSource,
