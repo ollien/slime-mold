@@ -10,8 +10,7 @@
 			"ES2015",
 			"ScriptHost"
 		],
-		"esModuleInterop": true,
-		"typeRoots": ["./src/ts/types", "./node_modules/@types"]
+		"esModuleInterop": true
 	},
 	"include": [
 		"src/ts/*.ts",
