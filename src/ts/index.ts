@@ -96,6 +96,10 @@ function setupSimulationGUI(controlObject: SimulationProperties) {
  */
 function setupMouseDragControl(eventTarget: HTMLElement, controlObject: SimulationProperties) {
 	function assignPositionToController(event: MouseEvent) {
+		if ((event.buttons & 1) !== 1) {
+			return;
+		}
+
 		const { height, width } = eventTarget.getBoundingClientRect();
 		// eslint-disable-next-line no-param-reassign
 		controlObject.dragPosition = [
@@ -114,11 +118,7 @@ function setupMouseDragControl(eventTarget: HTMLElement, controlObject: Simulati
 	document.addEventListener('keyup', assignDisturbDirectionToController);
 
 	eventTarget.addEventListener('mousedown', assignPositionToController);
-	eventTarget.addEventListener('mousemove', (event: MouseEvent) => {
-		if (event.buttons & 1) {
-			assignPositionToController(event);
-		}
-	});
+	eventTarget.addEventListener('mousemove', assignPositionToController);
 
 	eventTarget.addEventListener('mouseup', () => {
 		// eslint-disable-next-line no-param-reassign
