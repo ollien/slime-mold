@@ -242,7 +242,7 @@ window.addEventListener('load', () => {
 		frag: renderTextureShaderSource,
 		uniforms: {
 			color: regl.prop<SimulationProperties, 'color'>('color'),
-			in_texture: (): Framebuffer => depositStates.peekFront(),
+			luma_texture: (): Framebuffer => depositStates.peekFront(),
 		},
 	});
 
