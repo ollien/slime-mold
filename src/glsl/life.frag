@@ -71,6 +71,9 @@ float get_movement_angle(vec2 current_position, float current_angle) {
 	}
 }
 
+/**
+ * Get the distance of this cell from the disturb center (i.e. where the mouse is clicked)
+ */
 vec2 get_offset_from_disturb_center(vec2 cell_pos) {
 	if (mouse_drag_position == vec2(-1.)) {
 		return vec2(-1.);
@@ -88,7 +91,9 @@ void main() {
 	float cell_angle = relative_angle_to_rads(res.b);
 	float movement_angle = get_movement_angle(res.xy, cell_angle);
 	vec2 offset = paused ? vec2(0.) : get_position_offset_from_angle(res.xy, movement_angle);
+
 	vec2 disturb_offset = get_offset_from_disturb_center(res.xy);
+	// If the user has clicked somewhere, we will have a disturb center (i.e. non -1). Check if this cell is within the radius of that click.
 	if (disturb_offset != vec2(-1.) && length(disturb_offset) < length(vec2(disturb_radius)/resolution)) {
 		// Divide this by sixteen so it takes a few frames for things to move out of the way
 		float disturb_multiplier = disturb_radius/16.;
