@@ -106,11 +106,12 @@ function setupMouseDragControl(eventTarget: HTMLElement, controlObject: Simulati
 	}
 
 	function assignDisturbDirectionToController(event: KeyboardEvent) {
+		// eslint-disable-next-line no-param-reassign
 		controlObject.pullInwards = event.shiftKey;
 	}
 
 	document.addEventListener('keydown', assignDisturbDirectionToController);
-	document.addEventListener('keyup',  assignDisturbDirectionToController);
+	document.addEventListener('keyup', assignDisturbDirectionToController);
 
 	eventTarget.addEventListener('mousedown', assignPositionToController);
 	eventTarget.addEventListener('mousemove', (event: MouseEvent) => {
