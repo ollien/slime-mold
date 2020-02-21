@@ -1,6 +1,6 @@
 # Slime Mold: CS420X Assignment 3
 
-Slime Mold simulation. Based on [this blog post](https://sagejenson.com/physarum) and [this paper](https://uwe-repository.worktribe.com/output/980579). Inspiration for the implementation was sourced from [this blog post](https://kaesve.nl/projects/mold/summary.html).
+Slime Mold (physarum) simulation. Based on [this blog post](https://sagejenson.com/physarum) and [this paper](https://uwe-repository.worktribe.com/output/980579). Inspiration for the implementation was sourced from [this blog post](https://kaesve.nl/projects/mold/summary.html).
 
 [Demo](https://ollien.github.io/slime-mold/)
 
