@@ -46,7 +46,7 @@ function setCanvasSize(canvas: HTMLCanvasElement): void {
  * 	r: x coordinate
  * 	g: y coordinate
  * 	b: z coordinate
- *  a: 1 if the pixel is part of the simulation, 0 otherwise.
+ * 	a: 1 if the pixel is part of the simulation, 0 otherwise.
  *
  * @param numRandomItems The number of items to generate. Must be <= length.
  * @param length The size of the array to generate. Will be padded with zeroes.
@@ -119,7 +119,6 @@ function setupMouseDragControl(eventTarget: HTMLElement, controlObject: Simulati
 
 	eventTarget.addEventListener('mousedown', assignPositionToController);
 	eventTarget.addEventListener('mousemove', assignPositionToController);
-
 	eventTarget.addEventListener('mouseup', () => {
 		// eslint-disable-next-line no-param-reassign
 		controlObject.dragPosition = [-1, -1];
