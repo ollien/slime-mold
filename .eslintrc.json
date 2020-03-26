@@ -19,8 +19,8 @@
         "@typescript-eslint"
     ],
     "rules": {
-		"no-tabs": 0,
-		"indent": ["error", "tab"],
+        "no-tabs": 0,
+        "indent": ["error", "tab"],
         "no-plusplus": 0,
         "no-console": "off",
         "lines-between-class-members": "off",
