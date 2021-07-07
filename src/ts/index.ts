@@ -136,7 +136,7 @@ function makeCellVertices(n: number, width: number, height: number): [number, nu
 	const res = [];
 	for (let i = 0; i < width && res.length < n; i++) {
 		for (let j = 0; j < height && res.length < n; j++) {
-			res.push([i / width, j / width]);
+			res.push([i / width, j / height]);
 		}
 	}
 
